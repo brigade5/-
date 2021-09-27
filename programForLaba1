@@ -1,0 +1,108 @@
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <set>
+
+using namespace std;
+
+// Обеспечим ввод предложения и запись его в переменную str
+string enteringString()
+{
+    string str;
+    getline(cin, str);
+
+    return str;
+}
+
+// Удалим ненужные знаки препинания(если они есть), которые присосались вместе со словами
+void removePuncMark(string *word)
+{
+    char puncMarks[7] = { ',', '.', ':', '-', ';', '!', '?'};
+    int lastLetter = (*word).length() - 1;
+
+    for(const auto& elem: puncMarks)
+        if ((*word)[lastLetter] == elem)
+            (*word).erase(lastLetter, 1);
+
+}
+
+// Делим полученную строку на слова и заполняем ими вектор 
+vector<string> lecsemVector(string str)
+{
+    vector <string> vecstr;
+
+    stringstream s(str); // s как cin только берет из строки 
+
+    string word;
+
+    while (s >> word) 
+    {
+        removePuncMark(&word);
+        vecstr.push_back(word);
+    }
+
+    return vecstr;
+}
+
+// Проверяем, если введено не слово
+bool wordCheck(vector<string> vecstr)
+{
+    for (const auto& elem : vecstr)
+        for(int i = 0; i < elem.length(); i++)
+        {
+            if ((i == 0 && elem[i] >= 'A' && elem[i] <= 'Z') || (elem[i] >= 'a' && elem[i] <= 'z'))
+                continue;
+            else
+                return false;
+        }
+
+    return true;
+}
+
+// Записываем первое слово в сет, остальные по очереди в другой сет.
+// Так как в сет записываются уникальные, там нет повторов, а значит оба сета должны быть одного размера и одного содержания
+vector<string> wordsFromTheLettersOfTheFirst(vector<string> vecstr)
+{
+    set<char> firstWord(vecstr[0].begin(), vecstr[0].end());
+    vector<string> searchWords;
+
+    for(int i = 1; i < vecstr.size(); i++)
+    {
+        set<char> word(vecstr[i].begin(), vecstr[i].end());
+
+        if(firstWord == word)
+        {
+            searchWords.push_back(vecstr[i]);
+        }
+
+    }
+
+    return searchWords;
+}
+
+int main() 
+{
+    setlocale(LC_ALL, "rus");
+
+    cout << "Введите предложение: " << endl;
+
+    string str = enteringString();
+
+    vector<string> vecstr = lecsemVector(str);
+
+    if(!wordCheck(vecstr) || vecstr.size() == 0)
+        cout << endl <<"Ошибка! Входные данные неверны.";
+    else 
+    {
+        vector<string> searchWords = wordsFromTheLettersOfTheFirst(vecstr);
+
+        if (searchWords.size() > 0)
+            for (const auto& elem : searchWords)
+                cout << " " << elem;
+        else
+            cout << "Таких слов в предложении нет";
+    }
+
+    return 0;
+}
